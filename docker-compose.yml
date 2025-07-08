@@ -15,10 +15,4 @@ services:
       ACCESS_TOKEN: ${ACCESS_TOKEN}
       DATABASE_URL: ${DATABASE_URL}
       NODE_ENV: production
-      
-    networks:
-      - hitstv-network
 
-networks:
-  hitstv-network:
-    driver: bridge
