@@ -220,18 +220,17 @@ hitstv-bot/
 If you encounter errors with `@discordjs/opus` during Docker build, the Dockerfile automatically handles this:
 
 - **Removes** the problematic `@discordjs/opus` dependency  
-- **Installs** `opusscript` as a pure JavaScript fallback
+- **Keeps** `sodium-native` for secure voice encryption (required by Discord)
+- **Installs** `opusscript` as a pure JavaScript Opus fallback
+- **Includes** build tools only for `sodium-native` compilation
 - **Uses** FFmpeg for audio processing
-- **Configures** Discord.js voice to avoid native Opus encoding
 
-The bot works perfectly without native Opus - `opusscript` provides all necessary functionality without compilation issues.
+The bot requires encryption for voice connections, so `sodium-native` is essential for security.
 
 **Error messages you might see (automatically handled):**
-- `Cannot find module '@discordjs/opus'`
-- `Cannot find module 'node-opus'` 
-- `Cannot find module 'opusscript'`
-
-These are resolved by the automatic fallback system.
+- `Cannot find module '@discordjs/opus'` ✅ Resolved with opusscript
+- `Cannot play audio as no valid encryption package is installed` ✅ Resolved with sodium-native
+- Opus encoding warnings ✅ Resolved with fallback system
 
 ### Bot doesn't join voice channel
 - Check bot permissions in the voice channel
@@ -246,9 +245,14 @@ These are resolved by the automatic fallback system.
 
 ### Voice connection issues
 If the bot connects but no audio plays:
-- The bot automatically uses `opusscript` fallback for encoding
-- Audio resources are created with `StreamType.Arbitrary` for maximum compatibility
+- The bot uses `sodium-native` for secure voice encryption (required by Discord)
+- Audio encoding falls back to `opusscript` for maximum compatibility
+- Audio resources are created with `StreamType.Arbitrary` for reliability
 - Volume is automatically set to 50% to prevent audio distortion
+
+**Common encryption errors (automatically resolved):**
+- `Cannot play audio as no valid encryption package is installed` → Uses sodium-native
+- Opus encoding failures → Uses opusscript fallback
 
 ### Commands not working
 - Commands are automatically deployed on bot startup
