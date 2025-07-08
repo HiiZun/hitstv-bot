@@ -217,24 +217,14 @@ hitstv-bot/
 ### Docker Build Issues
 
 #### @discordjs/opus compilation errors
-If you encounter errors with `@discordjs/opus` during Docker build:
+If you encounter errors with `@discordjs/opus` during Docker build, the Dockerfile automatically removes this dependency during the build process. The bot works perfectly without it - opus is only an audio encoding optimization package.
 
-**Option 1: Use the updated Dockerfile (includes build tools)**
-The main Dockerfile now includes Python and build tools needed for opus compilation.
+The Dockerfile uses a clean Alpine Linux approach:
+- Installs only FFmpeg (required for audio processing)
+- Removes the problematic `@discordjs/opus` dependency
+- Installs all other dependencies normally
 
-**Option 2: Use minimal Dockerfile without opus**
-```bash
-# Use the minimal Dockerfile that removes opus dependency
-docker build -f Dockerfile.minimal -t hitstv-bot .
-```
-
-**Option 3: Use the light Dockerfile with Debian base**
-```bash
-# Use the Debian-based Dockerfile for better compatibility
-docker build -f Dockerfile.light -t hitstv-bot .
-```
-
-Note: The bot works fine without `@discordjs/opus` - it's only an optimization package.
+This ensures a reliable, lightweight build every time.
 
 ### Bot doesn't join voice channel
 - Check bot permissions in the voice channel

@@ -1,14 +1,8 @@
 # Use official Node.js LTS image
 FROM node:22-alpine
 
-# Install FFmpeg and build dependencies for native modules
-RUN apk add --no-cache \
-    ffmpeg \
-    python3 \
-    make \
-    g++ \
-    gcc \
-    libc-dev
+# Install FFmpeg (only requirement for audio processing)
+RUN apk add --no-cache ffmpeg
 
 # Set working directory
 WORKDIR /app
@@ -16,8 +10,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --production
+# Remove problematic opus dependency and install other dependencies
+RUN npm pkg delete dependencies.@discordjs/opus && \
+    npm install --production
 
 # Copy source code
 COPY . .
