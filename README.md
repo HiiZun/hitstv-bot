@@ -219,18 +219,17 @@ hitstv-bot/
 #### @discordjs/opus compilation errors
 If you encounter errors with `@discordjs/opus` during Docker build, the Dockerfile automatically handles this:
 
-- **Removes** the problematic `@discordjs/opus` dependency  
-- **Keeps** `sodium-native` for secure voice encryption (required by Discord)
-- **Installs** `opusscript` as a pure JavaScript Opus fallback
-- **Includes** build tools only for `sodium-native` compilation
-- **Uses** FFmpeg for audio processing
+- **Removes** `@discordjs/opus` and `sodium-native` (both require native compilation)
+- **Uses** `libsodium-wrappers` for voice encryption (pure JavaScript, no compilation needed)
+- **Uses** `opusscript` for audio encoding (pure JavaScript, no compilation needed)
+- **Requires** only FFmpeg for audio processing
 
-The bot requires encryption for voice connections, so `sodium-native` is essential for security.
+This approach ensures zero compilation issues while maintaining full functionality.
 
 **Error messages you might see (automatically handled):**
 - `Cannot find module '@discordjs/opus'` ✅ Resolved with opusscript
-- `Cannot play audio as no valid encryption package is installed` ✅ Resolved with sodium-native
-- Opus encoding warnings ✅ Resolved with fallback system
+- `Cannot play audio as no valid encryption package is installed` ✅ Resolved with libsodium-wrappers
+- Native compilation errors ✅ Avoided completely with pure JavaScript implementations
 
 ### Bot doesn't join voice channel
 - Check bot permissions in the voice channel
@@ -245,13 +244,14 @@ The bot requires encryption for voice connections, so `sodium-native` is essenti
 
 ### Voice connection issues
 If the bot connects but no audio plays:
-- The bot uses `sodium-native` for secure voice encryption (required by Discord)
-- Audio encoding falls back to `opusscript` for maximum compatibility
+- The bot uses `libsodium-wrappers` for secure voice encryption (pure JavaScript, no compilation)
+- Audio encoding uses `opusscript` for maximum compatibility (pure JavaScript)
 - Audio resources are created with `StreamType.Arbitrary` for reliability
 - Volume is automatically set to 50% to prevent audio distortion
 
 **Common encryption errors (automatically resolved):**
-- `Cannot play audio as no valid encryption package is installed` → Uses sodium-native
+- `Cannot play audio as no valid encryption package is installed` → Uses libsodium-wrappers
+- `Install sodium, libsodium-wrappers, or tweetnacl` → libsodium-wrappers is included
 - Opus encoding failures → Uses opusscript fallback
 
 ### Commands not working
