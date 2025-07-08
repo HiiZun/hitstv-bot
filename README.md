@@ -223,12 +223,19 @@ If you encounter errors with `@discordjs/opus` during Docker build, the Dockerfi
 - **Uses** `libsodium-wrappers` for voice encryption (pure JavaScript, no compilation needed)
 - **Uses** `opusscript` for audio encoding (pure JavaScript, no compilation needed)
 - **Requires** only FFmpeg for audio processing
+- **Uses** compatible versions to avoid dependency conflicts
 
 This approach ensures zero compilation issues while maintaining full functionality.
 
+**Specific versions used for compatibility:**
+- `opusscript@^0.0.8` (required by prism-media)
+- `libsodium-wrappers@^0.7.15` (latest stable)
+- Build uses `--legacy-peer-deps` to resolve any remaining conflicts
+
 **Error messages you might see (automatically handled):**
-- `Cannot find module '@discordjs/opus'` ✅ Resolved with opusscript
+- `Cannot find module '@discordjs/opus'` ✅ Resolved with opusscript v0.0.8
 - `Cannot play audio as no valid encryption package is installed` ✅ Resolved with libsodium-wrappers
+- `ERESOLVE could not resolve` ✅ Resolved with --legacy-peer-deps and compatible versions
 - Native compilation errors ✅ Avoided completely with pure JavaScript implementations
 
 ### Bot doesn't join voice channel

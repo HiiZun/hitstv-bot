@@ -1,5 +1,5 @@
-# Use official Node.js LTS image
-FROM node:22-alpine
+# Use official Node.js LTS image (latest stable)
+FROM node:22.17.0-alpine
 
 # Install FFmpeg (only requirement for audio processing)
 RUN apk add --no-cache ffmpeg
@@ -12,7 +12,7 @@ COPY package*.json ./
 
 # Remove only the problematic opus dependency, keep encryption packages
 RUN npm pkg delete dependencies.@discordjs/opus dependencies.sodium-native && \
-    npm install --production
+    npm install --production --legacy-peer-deps
 
 # Copy source code
 COPY . .
