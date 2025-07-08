@@ -214,6 +214,28 @@ hitstv-bot/
 
 ## Troubleshooting
 
+### Docker Build Issues
+
+#### @discordjs/opus compilation errors
+If you encounter errors with `@discordjs/opus` during Docker build:
+
+**Option 1: Use the updated Dockerfile (includes build tools)**
+The main Dockerfile now includes Python and build tools needed for opus compilation.
+
+**Option 2: Use minimal Dockerfile without opus**
+```bash
+# Use the minimal Dockerfile that removes opus dependency
+docker build -f Dockerfile.minimal -t hitstv-bot .
+```
+
+**Option 3: Use the light Dockerfile with Debian base**
+```bash
+# Use the Debian-based Dockerfile for better compatibility
+docker build -f Dockerfile.light -t hitstv-bot .
+```
+
+Note: The bot works fine without `@discordjs/opus` - it's only an optimization package.
+
 ### Bot doesn't join voice channel
 - Check bot permissions in the voice channel
 - Ensure bot has Connect and Speak permissions
