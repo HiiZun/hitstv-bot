@@ -217,14 +217,21 @@ hitstv-bot/
 ### Docker Build Issues
 
 #### @discordjs/opus compilation errors
-If you encounter errors with `@discordjs/opus` during Docker build, the Dockerfile automatically removes this dependency during the build process. The bot works perfectly without it - opus is only an audio encoding optimization package.
+If you encounter errors with `@discordjs/opus` during Docker build, the Dockerfile automatically handles this:
 
-The Dockerfile uses a clean Alpine Linux approach:
-- Installs only FFmpeg (required for audio processing)
-- Removes the problematic `@discordjs/opus` dependency
-- Installs all other dependencies normally
+- **Removes** the problematic `@discordjs/opus` dependency  
+- **Installs** `opusscript` as a pure JavaScript fallback
+- **Uses** FFmpeg for audio processing
+- **Configures** Discord.js voice to avoid native Opus encoding
 
-This ensures a reliable, lightweight build every time.
+The bot works perfectly without native Opus - `opusscript` provides all necessary functionality without compilation issues.
+
+**Error messages you might see (automatically handled):**
+- `Cannot find module '@discordjs/opus'`
+- `Cannot find module 'node-opus'` 
+- `Cannot find module 'opusscript'`
+
+These are resolved by the automatic fallback system.
 
 ### Bot doesn't join voice channel
 - Check bot permissions in the voice channel
@@ -235,6 +242,13 @@ This ensures a reliable, lightweight build every time.
 - Ensure FFmpeg is installed and accessible
 - Check if the radio stream URL is accessible
 - Verify Discord voice connection is stable
+- If you see Opus-related errors, they are automatically handled by fallbacks
+
+### Voice connection issues
+If the bot connects but no audio plays:
+- The bot automatically uses `opusscript` fallback for encoding
+- Audio resources are created with `StreamType.Arbitrary` for maximum compatibility
+- Volume is automatically set to 50% to prevent audio distortion
 
 ### Commands not working
 - Commands are automatically deployed on bot startup

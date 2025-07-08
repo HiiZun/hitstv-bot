@@ -79,7 +79,10 @@ export class RadioService {
           title: 'HiiZun Radio Stream'
         },
         // Add silencePaddingFrames to help with buffering
-        silencePaddingFrames: 5
+        silencePaddingFrames: 5,
+        // Explicitly disable opus encoding to prevent dependency issues
+        encoderArgs: ['-af', 'volume=0.5'],
+        format: 'arbitrary'
       });
       
       // Set default volume to 50%
@@ -99,7 +102,10 @@ export class RadioService {
         metadata: {
           title: 'HiiZun Radio Stream'
         },
-        silencePaddingFrames: 5
+        silencePaddingFrames: 5,
+        // Explicitly disable opus encoding to prevent dependency issues
+        encoderArgs: ['-af', 'volume=0.5'],
+        format: 'arbitrary'
       });
       
       resource.volume?.setVolume(0.5);

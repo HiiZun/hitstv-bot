@@ -10,8 +10,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Remove problematic opus dependency and install other dependencies
+# Remove problematic opus dependency and install opusscript fallback
 RUN npm pkg delete dependencies.@discordjs/opus && \
+    npm install opusscript --save && \
     npm install --production
 
 # Copy source code
