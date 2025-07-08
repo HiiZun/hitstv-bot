@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   hitstv-bot:
-    build: .
+    image: ghcr.io/hiizun/hitstv-bot:latest
     container_name: hitstv-bot
     restart: unless-stopped
     environment:
