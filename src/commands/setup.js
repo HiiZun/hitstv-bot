@@ -16,18 +16,22 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
   await interaction.deferReply();
 
-  // Check permissions
-  if (!PermissionUtils.canManageRadio(interaction.member)) {
-    const embed = new EmbedBuilder()
-      .setColor(0xe74c3c)
-      .setTitle('❌ Permission Denied')
-      .setDescription('You need **Manage Channels** permission to set up radio streaming.');
-    
-    return await interaction.editReply({ embeds: [embed] });
-  }
+  try {
+    // Ensure we have a full member object with permissions
+    const member = await PermissionUtils.ensureFullMember(interaction);
 
-  const voiceChannel = interaction.options.getChannel('channel');
-  const botMember = interaction.guild.members.me;
+    // Check permissions
+    if (!PermissionUtils.canManageRadio(member)) {
+      const embed = new EmbedBuilder()
+        .setColor(0xe74c3c)
+        .setTitle('❌ Permission Denied')
+        .setDescription('You need **Manage Channels** permission to set up radio streaming.');
+      
+      return await interaction.editReply({ embeds: [embed] });
+    }
+
+    const voiceChannel = interaction.options.getChannel('channel');
+    const botMember = interaction.guild.members.me;
 
   // Check bot permissions
   if (!PermissionUtils.botCanJoinVoice(voiceChannel, botMember)) {
@@ -45,6 +49,79 @@ export async function execute(interaction) {
       });
     
     return await interaction.editReply({ embeds: [embed] });
+  }
+
+  try {
+    // Check if guild already has a streaming channel
+    const existingChannel = await StreamingChannelModel.findByGuildId(interaction.guildId);
+    
+    if (existingChannel) {
+      // Update existing channel
+      await StreamingChannelModel.update(interaction.guildId, {
+        channelId: voiceChannel.id,
+        channelName: voiceChannel.name
+      });
+    } else {
+      // Create new channel entry
+      await StreamingChannelModel.create({
+        guildId: interaction.guildId,
+        channelId: voiceChannel.id,
+        guildName: interaction.guild.name,
+        channelName: voiceChannel.name,
+        addedBy: interaction.user.id
+      });
+    }
+
+    // Join the voice channel
+    const voiceManager = interaction.client.voiceManager;
+    await voiceManager.joinVoiceChannel(voiceChannel);
+
+    const embed = new EmbedBuilder()
+      .setColor(0x2ecc71)
+      .setTitle('✅ Radio Setup Complete')
+      .setDescription(`🎵 Radio is now streaming to ${voiceChannel}`)
+      .addFields([
+        {
+          name: '📻 Channel',
+          value: voiceChannel.toString(),
+          inline: true
+        },
+        {
+          name: '👤 Set up by',
+          value: interaction.user.toString(),
+          inline: true
+        }
+      ])
+      .setTimestamp();
+
+    await interaction.editReply({ embeds: [embed] });
+
+  } catch (error) {
+    console.error('Error setting up radio:', error);
+    
+    const embed = new EmbedBuilder()
+      .setColor(0xe74c3c)
+      .setTitle('❌ Setup Failed')
+      .setDescription('Failed to set up radio streaming. Please try again.')
+      .addFields({
+        name: 'Error',
+        value: error.message || 'Unknown error',
+        inline: false
+      });
+    
+    await interaction.editReply({ embeds: [embed] });
+  }
+} catch (permissionError) {
+    if (permissionError.message && permissionError.message.includes('fetch')) {
+      console.error('Failed to fetch member:', permissionError);
+      const embed = new EmbedBuilder()
+        .setColor(0xe74c3c)
+        .setTitle('❌ Error')
+        .setDescription('Unable to verify permissions. Please try again.');
+      
+      return await interaction.editReply({ embeds: [embed] });
+    }
+    throw permissionError; // Re-throw other errors
   }
 
   try {

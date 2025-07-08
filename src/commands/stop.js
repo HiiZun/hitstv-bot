@@ -9,14 +9,30 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
   await interaction.deferReply();
 
-  // Check permissions
-  if (!PermissionUtils.canManageRadio(interaction.member)) {
-    const embed = new EmbedBuilder()
-      .setColor(0xe74c3c)
-      .setTitle('❌ Permission Denied')
-      .setDescription('You need **Manage Channels** permission to stop radio streaming.');
-    
-    return await interaction.editReply({ embeds: [embed] });
+  try {
+    // Ensure we have a full member object with permissions
+    const member = await PermissionUtils.ensureFullMember(interaction);
+
+    // Check permissions
+    if (!PermissionUtils.canManageRadio(member)) {
+      const embed = new EmbedBuilder()
+        .setColor(0xe74c3c)
+        .setTitle('❌ Permission Denied')
+        .setDescription('You need **Manage Channels** permission to stop radio streaming.');
+      
+      return await interaction.editReply({ embeds: [embed] });
+    }
+  } catch (permissionError) {
+    if (permissionError.message && permissionError.message.includes('fetch')) {
+      console.error('Failed to fetch member:', permissionError);
+      const embed = new EmbedBuilder()
+        .setColor(0xe74c3c)
+        .setTitle('❌ Error')
+        .setDescription('Unable to verify permissions. Please try again.');
+      
+      return await interaction.editReply({ embeds: [embed] });
+    }
+    throw permissionError;
   }
 
   try {

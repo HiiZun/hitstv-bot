@@ -241,6 +241,12 @@ This ensures a reliable, lightweight build every time.
 - Check bot has application command permissions
 - Verify user has required permissions
 
+### Permissions errors in production
+If you see `member.permissions.has is not a function` errors:
+- This is automatically handled by fetching full member objects
+- The bot will fall back to fetching member data if partial objects are received
+- This commonly happens in production environments with large servers
+
 ## Support
 
 For issues or questions, check the console logs for error messages. The bot includes comprehensive error handling and logging.

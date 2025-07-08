@@ -2,9 +2,24 @@ import { PermissionFlagsBits } from 'discord.js';
 
 export class PermissionUtils {
   /**
+   * Ensure we have a full member object with permissions
+   */
+  static async ensureFullMember(interaction) {
+    let member = interaction.member;
+    if (!member || !member.permissions) {
+      member = await interaction.guild.members.fetch(interaction.user.id);
+    }
+    return member;
+  }
+
+  /**
    * Check if user has manage channels permission
    */
   static hasManageChannels(member) {
+    // Handle partial members or members without permissions
+    if (!member || !member.permissions) {
+      return false;
+    }
     return member.permissions.has(PermissionFlagsBits.ManageChannels);
   }
 
@@ -19,6 +34,10 @@ export class PermissionUtils {
    * Check if user can manage radio (has manage channels or is developer)
    */
   static canManageRadio(member) {
+    // Handle partial members or undefined members
+    if (!member) {
+      return false;
+    }
     return this.hasManageChannels(member) || this.isDeveloper(member.id);
   }
 
