@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  hitstv-bot:
+    build: .
+    container_name: hitstv-bot
+    restart: unless-stopped
+    environment:
+      # Discord Bot Configuration
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      CLIENT_ID: ${CLIENT_ID}
+      GUILD_ID: ${GUILD_ID}
+      DEVELOPER_ID: ${DEVELOPER_ID}
+      
+      # Radio Stream Configuration
+      RADIO_STREAM_URL: ${RADIO_STREAM_URL}
+      RADIO_STATUS_URL: ${RADIO_STATUS_URL}
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
+      
+      # Database Configuration (External MariaDB/MySQL)
+      DATABASE_URL: ${DATABASE_URL}
+      
+      # Runtime Configuration
+      NODE_ENV: production
+      DEBUG: false
+      
+    networks:
+      - hitstv-network
+
+networks:
+  hitstv-network:
+    driver: bridge
